@@ -1,6 +1,6 @@
 <launch>
 	<!-- 设置机器人模型路径参数 -->
-	<param name="robot_description" textfile="$(find jubot_demo)/urdf/jubot_box.urdf" />
+	<param name="robot_description" command="$(find xacro)/xacro $(find jubot_demo)/urdf_box/jubot_box.xacro" />
 
 	<!-- 运行joint_state_publisher节点，发布机器人的关节状态  -->
 	<node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
