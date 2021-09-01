@@ -1,0 +1,266 @@
+<robot name="jubox" xmlns:xacro="http://wiki.ros.org/xacro">
+    
+
+    <xacro:include filename="head.xacro"/>
+    <xacro:include filename="gazebo/box_move.xacro"/>
+    <xacro:include filename="gazebo/laser.xacro"/>
+    <xacro:include filename="gazebo/kinect.xacro"/> 
+
+
+    <!-- <xacro:property name="footprint_radius" value="0.001" /> -->
+<!--footprint-->
+    <!-- <link name="base_footprint">
+        <visual>
+            <geometry>
+                <sphere radius="${footprint_radius}"/>
+            </geometry>
+        </visual>        
+    </link>
+    <joint name="base2footprint" type="fixed">
+        <origin xyz="0.0 0.0 0.08" rpy="0.0 0.0 0.0"/>
+        <parent link="base_footprint"/>
+        <child link="base_link"/> 
+    </joint>-->
+
+<!--base_car-->
+
+    <xacro:property name="base_mass" value="2" />
+    <xacro:property name="base_length" value="0.67" />
+    <xacro:property name="base_weigth" value="0.53" />
+    <xacro:property name="base_heigth" value="0.10" />
+
+
+
+    <link name="base_link">   
+        <visual> 
+            <origin xyz="0.0 0.0 0.12" rpy="0.0 0.0 0.0"/> 
+            <geometry>  
+                <box size="0.67 0.53 0.10"/>            
+            </geometry>
+            <material name="white"> 
+                <color rgba="1 1 1 1"/>  
+            </material>
+        </visual>
+    <collision>
+        <geometry>  
+            <box size="0.67 0.53 0.10"/>            
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> 
+    </collision>
+    <xacro:Box_inertial_matrix m="${base_mass}"  l="${base_length}" w="${base_weigth}" h="${base_heigth}" />    
+    </link>
+    <gazebo reference="base_link">
+        <material>Gazebo/White</material>
+    </gazebo>
+
+
+<!--wheel-->
+    <xacro:property name="wheel_radius" value="0.13" />
+    <xacro:property name="wheel_length" value="0.04" />
+    <xacro:property name="wheel_mass" value="0.05" />
+
+    <xacro:property name="PI" value="3.1415927" />
+
+<xacro:macro name="wheel_func" params="wheel_name flag1 flag2">
+
+    <joint name="${wheel_name}_joint" type="continuous">   
+        <origin xyz="${0.20*flag2} ${0.298*flag1} 0.07" rpy="${PI/2} 0.0 0.0"/> 
+        <parent link="base_link"/>  
+        <child link="${wheel_name}_link"/> 
+        <axis xyz="0 0 1"/>  
+    </joint>
+
+    <link name="${wheel_name}_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0 0 0 1"/>
+            </material>
+        </visual>
+    <collision>
+        <geometry>  
+            <cylinder radius="${wheel_radius}" length="${wheel_length}"/>             
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> 
+    </collision>
+    <xacro:cylinder_inertial_matrix m="${wheel_mass}" r="${wheel_radius}" h="${wheel_length}" />    
+    </link>
+    <gazebo reference="${wheel_name}_link">
+        <material>Gazebo/Black</material>
+    </gazebo>
+
+</xacro:macro>   
+
+    <xacro:wheel_func wheel_name="left_back" flag1="1" flag2="-1"/>
+    <xacro:wheel_func wheel_name="right_back" flag1="-1" flag2="-1"/>
+    <xacro:wheel_func wheel_name="left_front" flag1="1" flag2="1"/>
+    <xacro:wheel_func wheel_name="right_front" flag1="-1" flag2="1"/>
+
+
+
+
+
+<!--support-->
+
+    <xacro:property name="support_l" value="0.04" />
+    <xacro:property name="support_h" value="0.11" />
+    <xacro:property name="support_w" value="0.04" />
+    <xacro:property name="support_mass" value="0.02" />
+    <xacro:property name="PI" value="3.1415927" />
+
+<xacro:macro name="support_func" params="support_name flag1 flag2">
+
+    <joint name="${support_name}_joint2" type="fixed">
+        <origin xyz="${0.3*flag1} ${0.24*flag2} 0.22" rpy="${PI/2} 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="${support_name}_link2"/>   
+    </joint>
+
+    <link name="${support_name}_link2">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="${support_l} ${support_h} ${support_w}"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1 1 1 0"/>
+            </material>
+        </visual>
+    <collision>
+        <geometry>  
+            <box size="${support_l} ${support_h} ${support_w}"/>         
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> 
+    </collision>
+    <xacro:Box_inertial_matrix m="${support_mass}"  l="${support_l}" w="${support_w}" h="${support_h}" />    
+    </link>
+    <gazebo reference="${support_name}_link2">
+        <material>Gazebo/White</material>
+    </gazebo>
+
+</xacro:macro>   
+
+    <xacro:support_func support_name="right_front" flag1="1" flag2="-1"/>
+    <xacro:support_func support_name="left_front" flag1="1" flag2="1"/>
+    <xacro:support_func support_name="left_back" flag1="-1" flag2="1"/>
+    <xacro:support_func support_name="right_back" flag1="-1" flag2="-1"/>
+
+
+
+
+<!--base2_link-->
+
+    <xacro:property name="base2_mass" value="1" />
+    <xacro:property name="base2_l" value="0.67" />
+    <xacro:property name="base2_w" value="0.53" />
+    <xacro:property name="base2_h" value="0.08" />
+
+
+    <joint name="base2_joint" type="fixed">
+        <origin xyz="0 0 0.27" rpy="0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="base2_link"/>   
+    </joint>
+
+    <link name="base2_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                 <box size="${base2_l} ${base2_w} ${base2_h}"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1 1 1 0"/>
+            </material>
+        </visual>
+    <collision>
+        <geometry>  
+            <box size="0.67 0.53 0.08"/>      
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> 
+    </collision>
+    <xacro:Box_inertial_matrix m="${base2_mass}"  l="${base2_l}" w="${base2_w}" h="${base2_h}" />    
+    </link>
+    <gazebo reference="base2_link">
+        <material>Gazebo/White</material>
+    </gazebo> 
+
+  
+<!--laser-->
+    <xacro:property name="laser_length" value="0.04" />
+    <xacro:property name="laser_radius" value="0.06" />
+    <xacro:property name="laser_mass" value="0.06" />
+    <xacro:property name="laser_x" value="0.0" />
+    <xacro:property name="laser_y" value="0.0" />
+    <xacro:property name="laser_z" value="${base2_h/2+laser_length/2}" />
+ 
+    <joint name="laser_joint" type="fixed">
+        <origin xyz="${laser_x} ${laser_y} ${laser_z}" rpy="0.0 0.0 0.0"/>
+        <parent link="base2_link"/>
+        <child link="laser"/>     
+    </joint>
+    <link name="laser">
+        <visual>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${laser_radius}" length="${laser_length}"/>
+            </geometry>
+            <material name="black">
+                <color rgba="0 0 0 0.7"/>
+            </material>
+        </visual>
+    <collision>
+        <geometry>  
+            <cylinder radius="${laser_radius}" length="${laser_length}"/>          
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> 
+    </collision>
+        <xacro:cylinder_inertial_matrix m="${laser_mass}" h="${laser_length}" r="${laser_radius}"/>  
+    </link>
+    <gazebo reference="laser">
+        <material>Gazebo/Black</material>
+    </gazebo>  
+
+
+<!--depth camera kinect-->
+   <xacro:property name="camera_length" value="0.02" />
+    <xacro:property name="camera_weigth" value="0.08" />
+    <xacro:property name="camera_heigth" value="0.04" />
+    <xacro:property name="camera_mass" value="0.02" />
+    <xacro:property name="camera_x" value="${base2_l/2-0.05}" />
+    <xacro:property name="camera_y" value="0.0" />
+    <xacro:property name="camera_z" value="${base2_h/2+camera_heigth/2}" />
+
+
+
+    <joint name="camera_joint" type="fixed">
+        <origin xyz="${camera_x} ${camera_y} ${camera_z}" rpy="0.0 0.0 0.0"/>
+        <parent link="base2_link"/>
+        <child link="camera"/>     
+    </joint>
+    <link name="camera">
+        <visual>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="${camera_length} ${camera_weigth} ${camera_heigth}"/>
+            </geometry>
+            <material name="blue">
+                <color rgba="0.0 0.0 1.0 0.9"/>
+            </material>
+        </visual>    
+    <collision>
+        <geometry>  
+            <box size="${camera_length} ${camera_weigth} ${camera_heigth}"/>            
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> 
+    </collision>
+        <xacro:Box_inertial_matrix m="${camera_mass}" l="${camera_length}" w="${camera_weigth}" h="${camera_heigth}" />  
+    </link>
+    <gazebo reference="camera">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+
+</robot>
